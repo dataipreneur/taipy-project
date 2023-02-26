@@ -3,12 +3,26 @@ import numpy as np
 
 from data.data import data 
 
-def get_zipcodes():
-    zip_code_data = list(np.sort(data['zip_code'].astype(str).unique()))
-    return zip_code_data
+def zip_filler(state):
+    #notify(state,"info", f'The state is {state.state_selector}')
+    #notify(state,"info", f'The zip codes are {state.zip_selector}')
+    notify(state,"info", f'Its entered')
+    data_state = data
+    zip_code_data = data_state[data_state['zip_code'] == state.state_selector][0:1000]
+    
+    
+def initialize_map(data):
+    data_province = data[data['state'] == state_selector][0:1000] 
+    return data_province
 
-def get_states():
-    address = data["full_address"].str.split(",", 3, expand=True)
-    data['state'] = address.loc[:,2]
-    unique_states = list(address.loc[:,2].unique())
-    return unique_states
+data_province_displayed = initialize_map(data)
+
+def map_filler(state):
+    notify(state,"info", f'The state is {state.state_selector}')
+    data_state = data
+    state.data_province_displayed = data_state[data_state['state'] == state.state_selector][0:1000] 
+
+
+def rest_fill(state):
+    notify(state,"info", f'The state inside button is {state.state_selector}')
+    state.data = data[data['state'] == state.state_selector][0:1000] 
