@@ -6,25 +6,64 @@ from data.data import data
 from pages.functions import *
 from pages.map import *
 
-zipcodes = get_zipcodes()
-states = get_states()
+data = data.dropna()
+
+data['state'] = [ x.split(', ')[-2] for x in data['full_address']]
+
+
+zip_code_data = list(data['zip_code'].unique())
+zip_selector = '35207'
+
+state_data = list(data['state'].unique())
+state_selector = 'AL'
+
+text_map = ['full_address','name']
+marker_map = {"showscale":True, "colorscale":"Viridis"}
+layout_map = {
+            "dragmode": "zoom",
+            "mapbox": { "style": "open-street-map", "center": { "lat": 38, "lon": -90 }, "zoom": 3}
+            }
+options = {"unselected":{"marker":{"opacity":0.5}}}
 
 page1='''
-#MAP
-<|layout|columns= 2 3 3|
-<|part|class_name=card|
-<|{selected_zipcode}|selector|lov={zipcodes}|on_change=check_zipcode|dropdown|label=ZipCode|>
+
+<center> <h2>TAIPY RESTO</h2> </center>
+
+<|layout|1 1|
+
+<|
+##State
+<|{state_selector}|selector|lov={state_data}|dropdown|on_change=zip_filler|>
+
+<|Submit|button|on_action=rest_fill|>
 |>
-<|{selected_state}|selector|lov={states}|on_change=check_state|dropdown|label=State|>
+
+<|
+##Zip
+<|{zip_selector}|selector|lov={zip_code_data}|dropdown|on_action=zip_2|filter|>
 |>
+
+|>
+
+<|layout|1 1|
+<|
+##Map
+<|{data_province_displayed}|chart|type=scattermapbox|lat=lat|lon=lng|height=500px|width=800px|options={options}|layout={layout_map}|mode=markers|text={text_map}|hovertext=state|>
+|>
+
+<|
+##Restaurant List
+<|{data}|table|columns=name;zip_code;state|page_size=10|page_size_options=10;30;100|not allow_all_rows|show_all=No|auto_loading=False|width=40vw|height=100vw|>
+|>
+
+|>
+
 '''
 
-page = page1+map_md
 
-gui_multi_pages = Gui(page=page)
+pages = Gui(page=page1)
 
 if __name__ == '__main__':
-    gui_multi_pages.run(title="Map",
-                        dark_mode=False,
-                        use_reloader=False,
-                        port = 5000)
+    pages.run(title="Map",
+                        dark_mode=True,
+                        use_reloader=False)
